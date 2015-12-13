@@ -1,0 +1,235 @@
+<!doctype html>
+<html>
+<head>
+<title>Chris Encarnacion's Canvas</title>
+<script>
+	  var canvas;
+	  var context;
+	  var shapes = []
+	  var timer;
+	  var parTimer;
+	  var timerRestart;
+	  var rgbstep = 50
+	//  var timerTwo;
+	  var possibleShapes = ['star','triangle','square','circle','bird'];
+	  var particles;
+	  
+	  function makeParticles() {
+	//create an array of particles for our animation
+	particles = [];
+	for(var i = 0; i < 30; i++)
+	{
+		particles.push(new Particle());
+	}
+ }
+ 
+	  function Particle()
+ {
+	 //the constructor for a single particle, with random starting x+y, velocity, color, and radius
+	 //this.x = Math.random()*canvas.width;
+	 //this.y = Math.random()*canvas.height;
+	 this.x = canvas.width/2;
+	 this.y = canvas.height/2;
+	 this.vx = Math.random()*10-5;
+	 this.vy = Math.random()*10-5;
+	 var colors = ["red", "green", "blue", "orange", "purple", "yellow", "white"];
+	 this.color = colors[Math.floor(Math.random()*colors.length)];
+	 this.radius = 30;
+ }
+ function moveParticles() {
+	 //partially clear the screen to fade previous circles, and draw a new particle at each new coordinate
+	 context.globalCompositeOperation = "source-over";
+	 context.fillStyle = "rgba(0, 0, 0, 0.3)";
+	 context.fillRect(0, 0, canvas.width, canvas.height);
+	 context.globalCompositeOperation = "lighter";
+	 for(var i = 0; i < particles.length; i++)
+	 {
+		 var p = particles[i];
+		 context.beginPath();
+		 context.arc(p.x, p.y, p.radius, 0, degreesToRadians(360), true);
+		 context.fillStyle = p.color;
+		 context.fill();
+		 p.x += p.vx;
+		 p.y += p.vy;
+		 if(p.x < -50) p.x = canvas.width+50;
+		 if(p.y < -50) p.y = canvas.height+50;
+		 if(p.x > canvas.width+50) p.x = -50;
+		 if(p.y > canvas.height+50) p.y = -50;
+		 p.radius -= 1;
+	 }
+ }
+	  
+	  function Shape(x, y, color) {
+		this.x = x;
+		this.y = y;
+		this.size = Math.random()*20+5;
+		this.dx = Math.random()*4-2;
+		this.dy = Math.random()*4-2;
+		this.color = color;
+		this.shape = possibleShapes[Math.floor(Math.random()*possibleShapes.length)];
+	  }
+      function init() {
+        canvas = document.getElementById('canvas');
+        context = canvas.getContext("2d");
+		
+		Textfadeup();
+ 
+        window.addEventListener('resize', resizeCanvas, true);
+        window.addEventListener('orientationchange', resizeCanvas, true);
+        resizeCanvas();
+		canvas.onclick = function(event) {
+			handleClick(event.clientX, event.clientY);
+		};
+		timer = setInterval(resizeCanvas, 20);
+		timerTwo = setInterval(newShape, 1500);
+		makeParticles();
+		parTimer = setInterval(moveParticles, 100);
+		timerRestart = setInterval(makeParticles, 2500);
+      }
+
+	  function newShape() {
+		var x = Math.random() * canvas.width;
+		var y = Math.random() * canvas.height;
+		var colors = ["red", "green", "blue", "orange", "purple", "yellow"];
+		var color = colors[Math.floor(Math.random()*colors.length)];
+		shapes.push(new Shape(x, y, color));
+		
+	  }
+
+	  function drawCircle(circle) {
+		 context.beginPath();
+		 context.arc(circle.x, circle.y, circle.size, 0, degreesToRadians(360), true);
+		 context.fillStyle = circle.color;
+		 context.fill();
+	  }
+	  function drawSquare(square) {
+		context.beginPath();
+		context.fillStyle = square.color;
+		context.fillRect(square.x, square.y, square.size, square.size);
+      }	 
+	  function drawTriangle(triangle) {
+		context.beginPath();
+		context.fillStyle = triangle.color;
+		context.moveTo(triangle.x+20,triangle.y);
+		context.lineTo(triangle.x+80,triangle.y+60);
+		context.lineTo(triangle.x-20,triangle.y+60);
+	    context.closePath();
+        context.fill();
+	  }
+
+	  function drawbird(bird) {
+		 context.beginPath();
+		 context.moveTo(bird.x, bird.y);
+		 context.bezierCurveTo(bird.x-40, bird.y, bird.x-40, bird.y+70, bird.x+140, bird.y+300);
+		 context.bezierCurveTo(bird.x+70, bird.y+70, bird.x+90, bird.y+110, bird.x+110, bird.y+70);
+		 context.bezierCurveTo(bird.x+250, bird.y+70, bird.x+250, bird.y+40, bird.x+210, bird.y+20);
+		 context.bezierCurveTo(bird.x+350, bird.y-100, bird.x+100, bird.y+0, bird.x+200, bird.y-60);
+		 context.bezierCurveTo(bird.x+450, bird.y-175, bird.x+80, bird.y-60, bird.x+110, bird.y-60);
+		 context.bezierCurveTo(bird.x-20, bird.y-175, bird.x-20, bird.y-20, bird.x-100, bird.y+50);
+
+
+		  // it looks sort of like a humming bird sideview style!
+		 context.closePath();
+		 context.lineWidth = 7;
+		 context.strokeStyle = bird.color;
+		 context.stroke();
+	  }
+
+	  function drawstar(star) {    //it was supppose to be a star :(
+		    context.beginPath(); 
+			context.moveTo(star.x, star.y);
+			context.lineTo(star.x+60,star.y+75);
+			context.lineTo(star.x+0, star.y+90); 
+			context.lineTo(star.x+60, star.y+105);
+			context.lineTo(star.x+25,star.y+155);  
+			context.lineTo(star.x+80,star.y+125);
+			context.lineTo(star.x+95,star.y+185);
+			context.lineTo(star.x+110,star.y+125);
+			context.lineTo(star.x+165,star.y+155);
+			context.lineTo(star.x+130,star.y+105);
+			context.lineTo(star.x+185,star.y+90);
+			context.closePath();
+			context.lineWidth= 2;
+			context.strokeStyle = star.color;
+			context.stroke();
+
+			
+			
+/**			context.beginPath();
+			context.lineJoin = 'miter';
+			context.moveTo(star.x, star.y);
+			context.arc(star.x, star.y+68, 34.5, 5.75, 3.66, false);
+			context.quadraticCurveTo(star.x-3.5, star.y+15, star.x, star.y);
+			context.closePath();
+			context.lineWidth = 2;
+			context.fillStyle = star.color;
+			context.fill(); **/
+	  }
+	  function Textfadeup() {									
+				rgbstep++;
+    context.fillStyle = "rgb(" + rgbstep + "," + rgbstep + "," + rgbstep + ")"
+    context.fillText("BEHOLD, Is this", canvas.width-50, canvas.height-350);
+    if (rgbstep < 255)
+		var t = setTimeout('Textfadeup()', 10);
+        if (rgbstep == 255) {
+			Textfadedown();
+            }
+        }
+function Textfadedown() {
+	rgbstep=rgbstep-1;
+    context.fillStyle = "rgb(" + rgbstep + "," + rgbstep + "," + rgbstep + ")"
+    context.fillText("really Art?", canvas.width-90, canvas.height-350);
+		if (rgbstep > 80)
+           var t = setTimeout('Textfadedown()', 10);
+        if (rgbstep == 80) {
+           Textfadeup();
+		   }
+    }  
+	 function drawText() {
+		context.fillStyle = 'white';
+		context.font = 'bold 2em sans-serif';
+		context.textAlign = 'right';
+		context.fillText('Woahh...', canvas.width-40, canvas.height-40);
+	}   
+	
+      function resizeCanvas() {
+        canvas.width = window.innerWidth-20;
+        canvas.height = window.innerHeight-20;
+		fillBackgroundColor();
+		for (var i=0; i<shapes.length; i++) {
+			if (shapes[i].shape == 'square') {
+				drawSquare(shapes[i]);
+			} else if (shapes[i].shape == 'circle') {
+				drawCircle(shapes[i]);
+			} else if (shapes[i].shape == 'triangle') {
+				drawTriangle(shapes[i]);
+			} else if (shapes[i].shape == 'star') {
+				drawstar(shapes[i]);
+			} else if (shapes[i].shape == 'bird') {
+				drawbird(shapes[i]);
+			}
+			if (shapes[i].x + shapes[i].dx > canvas.width || shapes[i].x + shapes[i].dx < 0)
+				shapes[i].dx = -shapes[i].dx;
+			if (shapes[i].y + shapes[i].dy > canvas.height || shapes[i].y + shapes[i].dy < 0)
+				shapes[i].dy = -shapes[i].dy;
+				shapes[i].x += shapes[i].dx;
+				shapes[i].y += shapes[i].dy;
+		}
+		drawText();		 
+      }
+	  function fillBackgroundColor() {
+		 //var colors = ["white", "yellow", "blue", "red"];
+		 //var bgColor = colors[Math.floor(Math.random() * colors.length)];
+		 context.fillStyle = 'black';
+		 context.fillRect(0, 0, canvas.width, canvas.height);
+	}
+	function degreesToRadians(degrees) {
+		//converts from degrees to radians and returns
+		return (degrees * Math.PI)/180;
+	}
+	window.onload = init;
+</script>
+</head>
+<body>
+<canvas id='canvas' width=500 height=500></canvas>
+</body>	  
